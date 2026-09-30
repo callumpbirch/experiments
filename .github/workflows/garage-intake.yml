@@ -17,7 +17,7 @@ jobs:
       - name: Check intake logic
         run: node --test garage-intake/tests/*.test.mjs
       - name: Install browser for automated checks
-        run: npm install --prefix "$RUNNER_TEMP/garage-demo-checks" playwright
+        run: npm install --prefix "$RUNNER_TEMP/garage-demo-checks" playwright@1.58.2 --fetch-timeout=30000 --fetch-retries=1
       - name: Prepare browser
         run: '"$RUNNER_TEMP/garage-demo-checks/node_modules/.bin/playwright" install --with-deps chromium'
       - name: Check downloadable and hosted demo
