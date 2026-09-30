@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<title>North Street Garage · Intake demo</title>
+<style>
+
+:root{--bg:#f2f3ef;--paper:#fff;--thread:#fbfcf9;--ink:#263c32;--muted:#758078;--line:#e1e5dc;--green:#315b46;--green-dark:#234532;--pale:#edf3e9;--amber:#76542a;--amber-bg:#fff2db;--red:#8b4030;--red-bg:#fff0ea}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink)}
+body{font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+button:disabled{cursor:default;opacity:.45}
+button,a,input,textarea,select,summary{outline-offset:4px}
+:focus-visible{outline:3px solid #b99748}
+h1,h2,h3,p{margin:0}
+h1{font-size:30px;line-height:1.15;font-weight:620;letter-spacing:-.045em}
+h2{font-size:17px;line-height:1.3;font-weight:650;letter-spacing:-.02em}
+a{color:var(--green);text-underline-offset:3px}
+button{color:inherit}
+input,textarea,select{width:100%;background:var(--paper);color:var(--ink);border:1px solid #ccd5c8;border-radius:8px;padding:11px 12px}
+textarea{resize:vertical;min-height:96px;line-height:1.55}
+input{min-height:44px}
+label{display:block;font-size:13px;font-weight:600;margin:15px 0 6px}
+label span{color:var(--muted);font-weight:400;margin-left:4px;font-size:11px}
+button,a{touch-action:manipulation}
+.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:var(--green);color:white;padding:11px 17px;border:1px solid var(--green);border-radius:8px;text-decoration:none;font-size:13px;font-weight:650;min-height:42px}
+.button:hover{background:var(--green-dark)}
+.button.secondary{background:transparent;color:var(--green);border-color:#c9d3c4}
+.button.secondary:hover{background:var(--pale)}
+.button.compact{padding:8px 12px;min-height:36px;font-size:12px}
+.text-button{display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;color:var(--green);padding:5px 0;font-size:12px;text-decoration:none}
+.text-button:hover{text-decoration:underline}
+.brand-mark{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;background:var(--green);color:white;border-radius:14px;flex-shrink:0}
+.brand-mark.small{width:27px;height:27px;border-radius:9px;background:#e8efe2;color:var(--green)}
+.brand-mark.small svg{width:16px;height:16px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;color:var(--muted);margin-bottom:10px}
+.fine-print{font-size:11px;color:var(--muted)}
+.inline-error{background:var(--red-bg);color:var(--red);padding:12px 14px;font-size:13px;border-radius:8px;margin-top:15px}
+.chat-shell{max-width:780px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;background:var(--thread);border-inline:1px solid var(--line)}
+.chat-header{display:flex;align-items:center;gap:12px;padding:21px 28px;border-bottom:1px solid var(--line);background:var(--paper);flex-shrink:0}
+.chat-header h1{font-size:16px;font-weight:650;letter-spacing:-.02em;display:flex;align-items:center;gap:7px}
+.chat-header p{font-size:11px;color:var(--muted);margin-top:5px}
+.chat-header p span{margin:0 5px}
+.verified{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--pale);color:var(--green)}
+.thread{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:28px 28px 30px;scroll-behavior:smooth}
+.thread-date{text-align:center;font-size:11px;color:#8a928b;margin:2px 0 31px}
+.chat-row{display:flex;align-items:flex-end;gap:9px;margin:15px 0}
+.chat-row.incoming{padding-right:40px}
+.chat-row.outgoing{justify-content:flex-end;padding-left:45px}
+.chat-row.incoming>.brand-mark{margin-bottom:3px}
+.bubble{font-size:14px;line-height:1.65;padding:13px 17px;max-width:530px;white-space:pre-wrap;overflow-wrap:anywhere}
+.incoming .bubble{border:1px solid var(--line);background:var(--paper);border-radius:17px 17px 17px 4px}
+.outgoing .bubble{background:#e9f0e3;color:#2d4434;border-radius:17px 17px 4px 17px}
+.bubble-secondary{color:var(--muted);font-size:13px;margin-top:7px}
+.staff-bubble{border-color:#bcccb4!important;background:#f2f6ee!important}
+.staff-label{color:var(--green);font-size:10px;letter-spacing:.02em;font-weight:700;margin-bottom:9px}
+.quick-replies{display:flex;flex-wrap:wrap;gap:8px;margin:13px 0 21px 36px;padding-right:10px}
+.quick-replies button{background:var(--paper);border:1px solid #cdd7c6;color:var(--green);border-radius:20px;padding:9px 13px;font-size:12px;line-height:1.3;min-height:38px}
+.quick-replies button:hover{background:var(--pale)}
+.composer-wrap{flex-shrink:0;padding:15px 28px 17px;background:var(--thread);border-top:1px solid var(--line);padding-bottom:max(17px,env(safe-area-inset-bottom))}
+.message-composer{padding:10px 13px;border:1px solid #cdd7c6;border-radius:18px;background:var(--paper);box-shadow:0 2px 7px #263c3205}
+.message-composer:focus-within{border-color:#74926a;box-shadow:0 0 0 2px #e6eee2}
+.message-composer textarea{border:0;outline:0;box-shadow:none;background:none;resize:none;min-height:30px;max-height:180px;padding:3px 1px;font-size:14px;border-radius:0}
+.message-composer textarea::placeholder{color:#929a92}
+.composer-tools{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-top:7px}
+.attach-button{display:grid;place-items:center;border-radius:7px;cursor:pointer;margin:0;color:var(--muted);width:40px;height:40px}
+.attach-button:hover{background:var(--pale);color:var(--green)}
+.attach-button input{display:none}
+.attach-button.disabled{pointer-events:none;opacity:.45}
+.send-button{display:grid;place-items:center;border:0;background:var(--green);color:white;border-radius:50%;height:40px;width:40px}
+.send-button:hover{background:var(--green-dark)}
+.send-button:disabled{background:#e1e8dc;color:#8d9c86;opacity:1}
+.composer-caption{text-align:center;font-size:10px;color:#929b90;margin-top:9px}
+.composer-caption span{margin-left:4px}
+.send-request-bar{display:flex;justify-content:space-between;align-items:center;gap:15px;padding-bottom:13px;font-size:12px;color:var(--muted)}
+.conversation-footer{flex-shrink:0;border-top:1px solid var(--line);padding:18px 24px;text-align:center;font-size:11px;color:var(--muted)}
+.thread-receipt{display:flex;gap:8px;align-items:center;margin:25px 0 10px 36px;font-size:12px;color:var(--green)}
+.saving-indicator{font-size:11px;color:var(--muted);margin:15px 0 15px 38px}
+.resume-link{font-size:12px;display:inline-flex;align-items:center;gap:6px;margin:5px 0 0 38px}
+.contact-card{border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:7px 20px 20px;max-width:370px;margin:14px 0 22px 36px}
+.contact-card details{margin:13px 0;color:var(--muted);font-size:11px}
+.contact-card summary{cursor:pointer}
+.contact-card details input{margin-top:10px}
+.contact-card p{font-size:10px;color:var(--muted);margin:15px 0}
+.contact-card .button{width:100%}
+.registration-input{text-transform:uppercase}
+.chat-photos{display:flex;gap:9px;flex-wrap:wrap;margin:20px 0 20px 36px}
+.photo-thumb{position:relative;width:92px;height:92px}
+.photo-open{border:0;padding:0;border-radius:10px;overflow:hidden;width:100%;height:100%;cursor:zoom-in}
+.photo-open img{width:100%;height:100%;object-fit:cover}
+.photo-remove{position:absolute;right:-5px;top:-5px;display:grid;place-items:center;width:22px;height:22px;border:1px solid var(--line);border-radius:50%;background:white;color:var(--muted)}
+.proposal-response{margin:22px 0 20px 36px;max-width:440px}
+.proposal-response>p{font-size:14px;margin-bottom:12px}
+.proposal-response>.text-button{margin-left:15px}
+.proposal-response>.fine-print{display:block;margin:12px 0}
+.proposal-response form{margin-top:20px}
+.proposal-response textarea{margin-bottom:10px}
+.photo-dialog{max-width:min(90vw,900px);max-height:90dvh;border:0;background:#15261e;padding:38px 15px 15px;border-radius:12px;color:white}
+.photo-dialog::backdrop{background:#0b1c15c9}
+.photo-dialog img{display:block;max-width:100%;max-height:72dvh;object-fit:contain}
+.photo-dialog p{font-size:11px;margin-top:10px}
+.lightbox-close{position:absolute;right:10px;top:7px;display:grid;place-items:center;width:27px;height:27px;background:none;color:white;border:0}
+.staff-header{padding:17px 30px;max-width:1140px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid var(--line)}
+.staff-brand{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:650;text-decoration:none;color:var(--ink)}
+.staff-header nav{display:flex;align-items:center;gap:20px;font-size:11px}
+.staff-header nav a{text-decoration:none;color:var(--muted)}
+.staff-header nav a:hover{color:var(--green)}
+.staff-page{max-width:1020px;margin:auto;padding:44px 30px 70px}
+.page-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:27px}
+.request-list{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.request-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:23px 24px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--line)}
+.request-row:last-child{border-bottom:0}
+.request-row:hover{background:#f9fbf5}
+.request-row h2{font-size:16px}
+.request-row p{font-size:12px;color:var(--muted);margin-top:6px}
+.request-meta{display:flex;align-items:center;gap:15px;font-size:11px;color:var(--muted)}
+.status-pill{display:inline-flex;align-items:center;padding:5px 9px;border-radius:5px;font-size:10px;background:#e9ede5;color:#65725e;white-space:nowrap}
+.status-pill.accepted{color:var(--green);background:#e3eddb}
+.status-pill.change_requested{color:var(--amber);background:var(--amber-bg)}
+.status-pill.submitted{background:#e6ede1;color:var(--green)}
+.empty-state{padding:38px 0}
+.empty-state p{font-size:14px;color:var(--muted);margin:10px 0 20px}
+.brief-page{max-width:860px}
+.back-link{display:inline-block;font-size:11px;color:var(--muted);text-decoration:none;margin-bottom:24px}
+.brief-heading{align-items:flex-start}
+.vehicle-line{font-size:13px;color:var(--muted);margin-top:9px}
+.vehicle-line span{margin:0 4px}
+.contact-link{display:inline-block;font-size:12px;margin-top:7px;text-decoration:none}
+.excluded-line{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:#59694f;margin-bottom:20px;padding:12px 14px;background:#eaf0e5;border-radius:7px;line-height:1.6}
+.excluded-line svg{flex-shrink:0;margin-top:2px}
+.triage-alert{margin:20px 0;background:var(--amber-bg);color:var(--amber);border-radius:8px;padding:14px;font-size:13px}
+.triage-alert p{font-size:12px;margin-top:4px}
+.brief-list{border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden}
+.brief-issue{padding:23px 24px;border-bottom:1px solid var(--line)}
+.brief-issue:last-child{border-bottom:0}
+.issue-heading{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.issue-heading .text-button{margin-left:auto}
+.priority-number{color:#8b9588;font-size:12px}
+.issue-heading h2{font-size:17px}
+.symptom-summary{font-size:14px;line-height:1.65;color:#3f5042}
+.issue-unknown{font-size:11px;color:var(--muted);margin-top:7px;margin-bottom:16px}
+.decision-buttons{display:flex;flex-wrap:wrap;gap:5px}
+.decision-buttons button{font-size:11px;padding:7px 10px;border:1px solid #e1e6da;background:#f8faf5;border-radius:5px;color:#77816e;min-height:33px}
+.decision-buttons button.selected{background:#e6eedf;border-color:#bccdad;color:#38542d;font-weight:650}
+.decision-buttons button:hover{border-color:#bccdad}
+.visit-summary{margin:26px 0}
+.section-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+.section-heading h2{font-size:15px}
+.visit-summary dl{margin:0;font-size:13px;display:grid;gap:12px}
+.visit-summary dl>div{display:grid;grid-template-columns:105px 1fr;gap:15px}
+.visit-summary dt{color:var(--muted);font-size:12px}
+.visit-summary dd{margin:0;white-space:pre-wrap}
+.issue-editor,.visit-editor{padding-top:5px}
+.issue-editor textarea{min-height:90px}
+.editor-pair{display:grid;grid-template-columns:110px 1fr;gap:14px}
+.issue-editor .button,.visit-editor .button{margin-top:15px}
+.save-row{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);margin:20px 0}
+.next-step{border-top:1px solid var(--line);padding-top:25px;margin-top:28px}
+.next-step textarea{min-height:265px;border-radius:10px;padding:16px;font-size:13px}
+.proposal-footer{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:12px}
+.proposal-footer>span{font-size:11px;color:var(--muted)}
+.save-feedback{color:var(--green);font-size:12px;margin-top:15px}
+.customer-response{border-left:3px solid #90aa7a;padding:15px 17px;background:#eaf1e4;border-radius:0 8px 8px 0;margin:24px 0;font-size:14px}
+.customer-response .eyebrow{margin-bottom:7px}
+.source-conversation{margin-top:32px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:18px}
+.source-conversation summary{cursor:pointer}
+.source-conversation>div{margin:20px 0;max-width:600px}
+.source-conversation span{font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+.source-conversation p{white-space:pre-wrap;margin-top:6px;color:var(--ink);font-size:13px}
+.brief-photos{margin-top:24px}
+.brief-photos h2{font-size:14px;margin-bottom:12px}
+.brief-photos>div{display:flex;gap:12px;flex-wrap:wrap}
+.brief-photos button{border:0;background:none;padding:0;cursor:zoom-in;text-align:left}
+.brief-photos img{width:120px;height:85px;object-fit:cover;border-radius:8px}
+.brief-photos span{display:block;font-size:10px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.login-page{max-width:360px;margin:12vh auto;padding:25px}
+.login-page h1{font-size:27px;margin-top:25px}
+.login-page>p{font-size:13px;color:var(--muted);margin-top:10px}
+.login-page form{margin-top:25px}
+.login-page .button{width:100%;margin-top:18px}
+.simple-page{max-width:500px;margin:12vh auto;padding:24px}
+.simple-page p{margin:15px 0 25px;color:var(--muted)}
+.demo-intro{font-size:14px;color:var(--muted);max-width:600px;margin-top:12px}
+.demo-actions{display:flex;flex-wrap:wrap;gap:12px;margin:25px 0 40px}
+.demo-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}
+.demo-links a{font-size:11px;text-decoration:none;border:1px solid #d6dfce;background:#fafcf6;padding:7px 11px;border-radius:6px}
+.sms-section{border-top:1px solid var(--line);padding-top:27px}
+.sms-section>p{font-size:12px;color:var(--muted);margin-top:8px}
+.sms-list{display:grid;gap:18px;margin-top:25px;max-width:580px}
+.sms-card{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:22px}
+.sms-card-top{display:flex;justify-content:space-between;gap:15px;font-size:11px;color:var(--muted);margin-bottom:15px}
+.sms-card p{font-size:14px;overflow-wrap:anywhere}
+.sms-card .button{margin-top:17px}
+@media(min-width:900px){.chat-shell{box-shadow:0 0 30px #263c3205}}
+@media(max-width:620px){
+  .chat-shell{border:0}
+  .chat-header{padding:16px 18px}
+  .chat-header .brand-mark{width:39px;height:39px;border-radius:12px}
+  .thread{padding:24px 16px}
+  .thread-date{margin-bottom:23px}
+  .chat-row.incoming{padding-right:8px}
+  .chat-row.outgoing{padding-left:35px}
+  .bubble{padding:11px 14px;font-size:14px}
+  .composer-wrap{padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+  .quick-replies{margin-left:35px;gap:7px}
+  .quick-replies button{font-size:11px;padding:9px 11px}
+  .contact-card{margin-left:35px;padding:5px 16px 17px}
+  .proposal-response{margin-left:35px}
+  .proposal-response>.text-button{margin:10px 0 0;display:block}
+  .thread-receipt{margin-left:35px;align-items:flex-start}
+  .staff-header{padding:15px 16px;flex-wrap:wrap;gap:12px}
+  .staff-header nav{gap:16px;width:100%;justify-content:space-between}
+  .staff-page{padding:29px 16px 50px}
+  .page-heading{gap:12px}
+  .page-heading h1{font-size:27px}
+  .request-row{padding:19px 16px;align-items:flex-start}
+  .request-meta{flex-direction:column;align-items:flex-end;gap:8px}
+  .request-meta>svg{display:none}
+  .request-row p{max-width:190px;font-size:11px}
+  .brief-heading{flex-wrap:wrap;gap:15px}
+  .brief-heading h1{font-size:29px}
+  .brief-issue{padding:20px 17px}
+  .decision-buttons{gap:5px}
+  .decision-buttons button{padding:8px;font-size:10px}
+  .visit-summary dl>div{grid-template-columns:85px 1fr;gap:10px}
+  .proposal-footer{align-items:flex-start}
+  .proposal-footer>span{max-width:120px}
+  .next-step textarea{min-height:300px}
+  .send-request-bar{font-size:11px}
+  .sms-card{padding:18px}
+}
+@media(prefers-reduced-motion:reduce){.thread{scroll-behavior:auto}*{transition:none!important}}
+
+.chat-shell{height:calc(100dvh - 44px)}
+.demo-toolbar{height:44px;padding:5px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#e9ede5;border-bottom:1px solid #dce3d5;font-size:10px;color:#6f7d66}
+.demo-toolbar>span{font-weight:650;letter-spacing:.03em}
+.demo-toolbar nav{display:flex;align-items:center;gap:3px}
+.demo-toolbar button{padding:6px 10px;border:0;border-radius:6px;background:none;color:#64725a;font-size:11px;min-height:30px}
+.demo-toolbar button.active{background:#fff;color:#315b46;box-shadow:0 1px 3px #263c3208}
+.demo-toolbar .restart{padding:5px;color:#7e8877;font-size:10px}
+#notification-dot{display:inline-block;width:5px;height:5px;margin-left:4px;border-radius:50%;background:#b58a43;vertical-align:middle}
+#notification-dot[hidden]{display:none}
+.example-label{font-size:10px!important;color:#8b9587!important;margin:9px 0 0!important}
+.save-feedback .text-button{font-size:12px}
+@media(max-width:420px){.demo-toolbar{padding-inline:10px;gap:4px}.demo-toolbar button{padding-inline:8px}.demo-toolbar>span{font-size:9px}}
+</style>
+</head>
+<body>
+<aside class="demo-toolbar" aria-label="Demo views">
+<span>BROWSER DEMO</span>
+<nav>
+<button data-nav="customer" data-action="customer">Customer</button>
+<button data-nav="garage" data-action="garage">Garage</button>
+<button data-nav="notification" data-action="notification">Notification<span id="notification-dot" hidden></span></button>
+</nav>
+<button class="restart" data-action="restart">Restart</button>
+</aside>
+<div id="app"></div>
+<dialog id="photo-dialog" class="photo-dialog"><div id="photo-content"></div></dialog>
+<script>
+// BEGIN INTAKE PROVIDER
+const IntakeProvider = (() => {
+
+// Channel-independent mock provider. No model API is used.
+// Replace this module's start/answer/revise contract with a model adapter later.
+const SCENARIO = "Loads of warning lights came on yesterday. My boot doesn’t stay up properly. There’s also a knocking noise I’ve been meaning to get checked. My MOT and service are due in November, but I want Skoda to do those because the car has a full Skoda service history.";
+
+const QUESTIONS = {
+  lights: {
+    key:"lights",
+    text:"Are any lights red or flashing, or has braking or steering changed?",
+    example:"Amber ABS, ESC and tyre pressure lights. No red or flashing lights. Braking and steering feel normal.",
+    choices:[
+      {label:"Amber only, drives normally",value:"Only amber lights. Braking and steering feel normal."},
+      {label:"Red / flashing, or driving changed",value:"There are red or flashing lights, or braking or steering has changed."},
+      {label:"Not sure",value:"I'm not sure which lights they are or whether driving has changed."}
+    ]
+  },
+  knock: {
+    key:"knock",text:"When do you hear the knocking?",
+    example:"At the front, over bumps. It's been happening for about two months and is getting louder.",
+    choices:[
+      {label:"Over bumps",value:"I hear it over bumps."},
+      {label:"When turning",value:"I hear it when turning."},
+      {label:"When braking",value:"I hear it when braking."},
+      {label:"Not sure",value:"I'm not sure when it happens."}
+    ]
+  },
+  other: {
+    key:"other",text:"When does it happen, and how does it affect the car?",
+    example:"It happens most days. I'm not sure what causes it.",
+    choices:[{label:"Not sure",value:"I'm not sure."}]
+  },
+  availability: {
+    key:"availability",text:"When could you leave the car with us?",
+    example:"Tuesday or Thursday morning, until 3 pm. I need it for school runs and would like help as soon as practical.",
+    choices:[]
+  },
+  forgotten: {
+    key:"forgotten",text:"Anything else you've been putting off, or anything we should work around?",
+    example:"Nothing else. Please quote before doing repairs.",
+    choices:[
+      {label:"Nothing else",value:"Nothing else."},
+      {label:"Please quote before repairs",value:"Nothing else. Please quote before doing repairs."}
+    ]
+  }
+};
+
+const normalise = text => text.toLowerCase().replace(/[’‘]/g,"'");
+const sentenceList = text => text.match(/[^.!?]+[.!?]?/g) || [text];
+
+function triage(text) {
+  let t=normalise(text);
+  t=t.replace(/\b(?:no|not|aren't|isn't|without)\s+(?:any\s+)?(?:red|flashing)(?:\s+(?:or|and)\s+(?:red|flashing))?(?:\s+lights?)?/g,"");
+  if(/\bred\b|\bflashing\b|(?:brak(?:e|es|ing)|steering).{0,30}(?:changed|worse|fail|heavy|different)|(?:lost|losing) power|overheat/.test(t))return "urgent";
+  if(/amber|yellow/.test(t)&&/normal|unchanged|no change|fine/.test(t))return "reported-normal";
+  return "unknown";
+}
+
+function extractIssues(text) {
+  const sentences=sentenceList(text);
+  const definitions=[
+    {id:"lights",test:/warning|dashboard|\babs\b|\besc\b|engine light/i,title:"Warning lights",type:"diagnosis"},
+    {id:"knock",test:/knock|clunk|rattl/i,title:"Knocking noise",type:"diagnosis"},
+    {id:"boot",test:/boot|tailgate/i,title:/stay|drop|fall|hold|support/i.test(text)?"Boot won't stay open":"Boot / tailgate problem",type:"inspect-and-quote"},
+    {id:"aircon",test:/air conditioning|air con\b|a\/c/i,title:"Air conditioning concern",type:"diagnosis"}
+  ];
+  const issues=definitions.filter(d=>d.test.test(text)).map((d,index)=>({
+    id:d.id,title:d.title,priority:index+1,
+    symptoms:sentences.filter(s=>d.test.test(s)).map(s=>s.trim()),
+    onset:d.id==="lights"&&/yesterday/i.test(text)?"Yesterday":"Not confirmed",
+    workType:d.type,urgency:d.id==="lights"?"Prompt safety review":"Review at visit",
+    uncertainties:[d.id==="boot"?"Required repair unconfirmed":"Cause unconfirmed"],
+    decision:d.id==="boot"?"quote":"investigate"
+  }));
+  return issues.length?issues:[{
+    id:"other",title:"Customer concern",priority:1,symptoms:[text],
+    onset:"Not confirmed",workType:"diagnosis",urgency:"Not confirmed",
+    uncertainties:["Symptoms and cause need clarification"],decision:"investigate"
+  }];
+}
+
+function extractExclusions(text) {
+  const t=normalise(text);
+  const reserved=/want\s+(?:skoda|škoda|(?:the\s+)?dealer)|(?:skoda|škoda|dealer).{0,40}(?:do those|do them|service history)|keep.{0,40}(?:skoda|škoda|dealer)/.test(t);
+  return reserved?[...(/\bmot\b/.test(t)?["MOT"]:[]),...(/\bservice\b/.test(t)?["Service"]:[])]:[];
+}
+function message(data,role,text) {
+  data.messages.push({id:globalThis.crypto.randomUUID(),role,text,at:new Date().toISOString()});
+}
+function addMessage(data,role,text){message(data,role,text);}
+function nextQuestion(data) {
+  if(data.issues.some(i=>i.id==="lights")&&!data.answers.lights)return QUESTIONS.lights;
+  if(data.issues.some(i=>i.id==="knock")&&!data.answers.knock)return QUESTIONS.knock;
+  if(data.issues.some(i=>i.id==="other"||i.id==="aircon")&&!data.answers.other)return QUESTIONS.other;
+  if(!data.answers.availability)return QUESTIONS.availability;
+  if(!data.answers.forgotten)return QUESTIONS.forgotten;
+  return null;
+}
+function advance(data) {
+  const q=nextQuestion(data);
+  data.questionKey=q?.key||null;
+  if(q){data.stage="questions";message(data,"assistant",q.text);}
+  else {
+    data.stage="contact";
+    message(data,"assistant","Where should we send the garage's reply?");
+  }
+}
+function addDetails(data,key,text) {
+  const issue=data.issues.find(i=>i.id===key)||(key==="other"?data.issues.find(i=>i.id==="aircon"):null);
+  if(!issue)return;
+  issue.symptoms.push(text);
+  if(key==="lights"){
+    const reported=triage(text);
+    if(data.safety!=="urgent")data.safety=reported;
+    issue.urgency=data.safety==="urgent"?"Contact before driving":"Prompt safety review";
+    issue.uncertainties=["Cause unconfirmed; lights and driving behaviour are customer reports"];
+  }
+  if(key==="knock"){
+    const age=text.match(/(?:for|about)\s+(?:about\s+)?(\w+\s+(?:days?|weeks?|months?|years?))/i);
+    if(age)issue.onset=age[1];
+  }
+}
+function start(text,source="website") {
+  const excluded=extractExclusions(text);
+  const data={
+    version:1,source,stage:"questions",status:"draft",original:text,
+    vehicle:{description:/skoda|škoda/i.test(text)?"Škoda · model not confirmed":"Vehicle not confirmed",registration:""},
+    customer:{name:"",mobile:""},issues:extractIssues(text),
+    preferences:{availability:"",urgency:"Not stated",constraints:"",
+      approval:"Quote before repairs. No repair work authorised.",
+      excludedWork:excluded,
+      exclusionReason:excluded.length?"Customer wants Škoda to retain their full dealer service history.":""
+    },
+    answers:{},questionKey:null,safety:triage(text),photos:[],messages:[],proposal:null
+  };
+  message(data,"customer",text);
+  const labels=data.issues.map(i=>i.title.toLowerCase());
+  const listed=labels.length>1?labels.slice(0,-1).join(", ")+" and "+labels.at(-1):labels[0];
+  message(data,"assistant","I've noted "+listed+"."+
+    (excluded.length?" Your MOT and service are staying with Škoda.":""));
+  // Skip details explicitly supplied in the opening; keep unresolved causes.
+  if(data.issues.some(i=>i.id==="lights")&&/amber|yellow|red|flashing/i.test(text)&&/brak|steer/i.test(text))data.answers.lights=text;
+  if(data.issues.some(i=>i.id==="knock")&&/over bumps|when turning|when braking/i.test(text))data.answers.knock=text;
+  if(data.safety==="urgent")message(data,"assistant","Please contact the garage before driving. Stop as soon as safe if warning lights are red or flashing, or braking or steering has changed. Discuss recovery if needed.");
+  advance(data);
+  return data;
+}
+function answer(data,text) {
+  if(data.stage!=="questions"||!data.questionKey)throw new Error("No question is waiting for an answer.");
+  const key=data.questionKey;
+  data.answers[key]=text;
+  message(data,"customer",text);
+  addDetails(data,key,text);
+  if(key==="lights"&&data.safety==="urgent")message(data,"assistant","Please contact the garage before driving. Stop as soon as safe if warning lights are red or flashing, or braking or steering has changed. Discuss recovery if needed.");
+  if(key==="availability"){
+    data.preferences.availability=text;
+    if(/as soon|urgent|today|tomorrow|soon|this week/i.test(text))data.preferences.urgency=text;
+    if(/school|work|budget|cost|leave|need|call|quote/i.test(text))data.preferences.constraints=text;
+  }
+  if(key==="forgotten"){
+    data.preferences.constraints=[data.preferences.constraints,text].filter(Boolean).join("\n");
+    if(!/^(nothing|no\b|none|not\b|that'?s everything)/i.test(text)){
+      const found=extractIssues(text);
+      const preferenceOnly=found.length===1&&found[0].id==="other"&&/quote|approval|before repairs|call me|budget|school runs/i.test(text);
+      if(!preferenceOnly)addConcerns(data,text);
+    }
+  }
+  advance(data);
+  return data;
+}
+function addConcerns(data,text) {
+  for(const extra of extractIssues(text)){
+    const existing=data.issues.find(i=>i.id===extra.id);
+    if(existing)existing.symptoms.push(text);
+    else { extra.priority=data.issues.length+1;extra.id=extra.id==="other"?"additional-"+data.issues.length:extra.id;data.issues.push(extra); }
+  }
+}
+function revise(data,text) {
+  if(data.stage!=="review"||data.status!=="draft")throw new Error("This draft is not ready for changes.");
+  message(data,"customer",text);
+  // Deliberately conservative: retain the customer's correction as evidence.
+  // A model adapter will later interpret arbitrary changes across fields.
+  addConcerns(data,text);
+  message(data,"assistant","I've added that detail to the request for the garage to review.");
+  return data;
+}
+function setContact(data,customer,vehicle) {
+  if(data.stage!=="contact")throw new Error("Contact details aren't needed yet.");
+  data.customer=customer;
+  data.vehicle={description:vehicle.description||data.vehicle.description,registration:vehicle.registration||""};
+  data.stage="review";
+  message(data,"assistant","Ready to send: "+data.issues.length+" separate concerns"+
+    (data.preferences.excludedWork.length?", with "+data.preferences.excludedWork.join(" and ")+" excluded":"")+
+    ". You can add anything we've missed below.");
+  return data;
+}
+function submit(data) {
+  if(data.stage!=="review"||data.status!=="draft")throw new Error("This intake isn't ready to send.");
+  data.stage="submitted";data.status="submitted";
+  message(data,"assistant","Your request is with the garage. They'll review it and propose a next step. An appointment and any charges still need confirming.");
+  return data;
+}
+function draftProposal(data) {
+  const verbs={
+    investigate:i=>"Investigate "+i.title.toLowerCase()+" and confirm the cause.",
+    quote:i=>"Inspect "+i.title.toLowerCase()+" and provide a repair quote.",
+    later:i=>"Discuss a later visit for "+i.title.toLowerCase()+".",
+    none:i=>"Take no action on "+i.title.toLowerCase()+" for this request."
+  };
+  const safety=data.issues.some(i=>i.id==="lights"||i.id==="knock")
+    ?"Please contact us before bringing the car in so we can discuss driving safety. ":"";
+  return "Hi "+(data.customer.name.split(" ")[0]||"there")+",\n\nHere's our proposed next step:\n\n"+
+    [...data.issues].sort((a,b)=>a.priority-b.priority).map(i=>"• "+verbs[i.decision](i)).join("\n")+
+    (data.preferences.excludedWork.length?"\n\n"+data.preferences.excludedWork.join(" and ")+" remain outside this request.":"")+
+    "\n\n"+safety+"We'll confirm an appointment that works with your availability and agree any diagnostic charge before starting. We'll ask for approval before repairs.";
+}
+function completeDemo() {
+  const data=start(SCENARIO,"demo");
+  let q;
+  while((q=nextQuestion(data)))answer(data,q.example);
+  setContact(data,{name:"Sam Taylor",mobile:"07700900123"},{description:"2016 Škoda Octavia estate",registration:"SK16 ODA"});
+  submit(data);
+  return data;
+}
+
+return {SCENARIO,QUESTIONS,triage,extractIssues,extractExclusions,addMessage,nextQuestion,start,answer,revise,setContact,submit,draftProposal,completeDemo};
+})();
+// END INTAKE PROVIDER
+
+"use strict";
+const KEY="north-street-simple-demo-v1";
+const $=selector=>document.querySelector(selector);
+const escapeHTML=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const e=escapeHTML;
+const ACTIONS={investigate:"Investigate now",quote:"Quote",later:"Schedule later",none:"No action"};
+let state={version:1,id:null,intake:null,notification:null};
+let compose=IntakeProvider.SCENARIO,proposalDraft="",proposalEdited=false,editing=null,visitEditing=false,feedback="";
+let pendingPhotos=[];
+try{
+  const saved=JSON.parse(localStorage.getItem(KEY)||"null");
+  if(saved?.version===1&&saved.intake?.version===1){state=saved;compose="";}
+}catch{}
+function uuid(){return crypto.randomUUID();}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(state));return true;}
+  catch{feedback="This browser couldn't save the demo. It still works while this page is open.";return false;}
+}
+function route(){
+  const [view="customer",id]=location.hash.slice(1).split("/");
+  return {view:["customer","garage","notification"].includes(view)?view:"customer",id};
+}
+function go(view,id){
+  const next="#"+view+(id?"/"+id:"");
+  if(location.hash===next)render();else location.hash=next;
+}
+function returnPath(){return "#customer/"+state.id;}
+function fullReturnURL(){return location.href.split("#")[0]+returnPath();}
+function icon(name,size=20){
+  const paths={
+    car:'<path d="m4 10 2-5h12l2 5M4 10h16v8H4z"/><path d="M7 18v2m10-2v2M7 13h2m6 0h2"/>',
+    send:'<path d="M12 19V5m-6 6 6-6 6 6"/>',
+    check:'<path d="m5 12 4 4L19 6"/>',
+    arrow:'<path d="M5 12h14m-6-6 6 6-6 6"/>',
+    attach:'<path d="m8 13 6-6a3 3 0 0 1 4 4l-8 8a5 5 0 0 1-7-7l9-9"/>',
+    close:'<path d="m6 6 12 12M6 18 18 6"/>'
+  };
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+paths[name]+'</svg>';
+}
+function brand(small=false){return '<span class="brand-mark'+(small?' small':'')+'" aria-hidden="true">'+icon("car")+'</span>';}
+function staffHeader(){return '<header class="staff-header"><span class="staff-brand">'+brand(true)+'North Street Garage</span><span class="fine-print">Browser demo · example details only</span></header>';}
+function textField(label,name,value="",required=false){
+  return '<label for="'+name+'">'+label+'</label><input id="'+name+'" name="'+name+'" value="'+e(value)+'" '+(required?'required':'')+'>';
+}
+function messageRow(m){
+  const incoming=m.role!=="customer";
+  return '<div class="chat-row '+(incoming?'incoming':'outgoing')+'">'+(incoming?brand(true):'')+
+    '<div class="bubble '+(m.role==="garage"?'staff-bubble':'')+'">'+
+    (m.role==="garage"?'<div class="staff-label">A reply from the garage</div>':'')+'<p>'+e(m.text)+'</p></div></div>';
+}
+function gallery(photos,editable=false){
+  if(!photos.length)return "";
+  return '<div class="chat-photos" aria-label="Attached photos">'+photos.map(p=>'<div class="photo-thumb">'+
+    '<button class="photo-open" data-action="photo" data-id="'+e(p.id)+'" aria-label="Open '+e(p.name)+'"><img src="'+e(p.dataUrl)+'" alt="'+e(p.name)+'"></button>'+
+    (editable?'<button class="photo-remove" data-action="remove-photo" data-id="'+e(p.id)+'" aria-label="Remove '+e(p.name)+'">'+icon("close",12)+'</button>':'')+'</div>').join("")+'</div>';
+}
+function customer(){
+  const data=state.intake,{id}=route();
+  if(id&&id!==state.id)return '<main class="simple-page"><h1>This browser has no saved conversation for that link.</h1><p>This prototype saves the demo on one device. Start a fresh example here.</p><button class="button" data-action="restart">Start example</button></main>';
+  const messages=data?data.messages:[{role:"assistant",text:"Hi. What's going on with your car?\n\nBig problems, small niggles—tell us everything."}];
+  const q=data?.questionKey?IntakeProvider.QUESTIONS[data.questionKey]:null;
+  let extra="";
+  if(q){
+    let choices=q.choices;
+    if(q.key==="availability")choices=[
+      {label:"Tuesday or Thursday morning",value:q.example},
+      {label:"As soon as possible",value:"As soon as possible. I can leave the car for a day."},
+      {label:"Not sure yet",value:"I'm not sure of my availability yet."}
+    ];
+    extra+='<div class="quick-replies" aria-label="Suggested replies">'+choices.map(c=>'<button data-action="quick" data-value="'+e(c.value)+'">'+e(c.label)+'</button>').join("")+'</div>';
+  }
+  if(data?.stage==="contact"){
+    extra+='<form class="contact-card" data-form="contact"><p class="example-label">Example details are ready to use.</p>'+
+      textField("Your name","name","Sam Taylor",true)+
+      '<label for="mobile">Mobile number</label><input id="mobile" name="mobile" type="tel" value="07700900123" required>'+
+      textField('Registration <span>optional</span>',"registration","SK16 ODA")+
+      '<details><summary>Add the model or year, if you know it</summary><label class="sr-only" for="description">Vehicle description</label><input id="description" name="description" value="2016 Škoda Octavia estate"></details>'+
+      '<p>Demo only. No message or call will be sent.</p><button class="button">Continue '+icon("arrow",16)+'</button></form>';
+  }
+  extra+=gallery(data?.photos||pendingPhotos,!data||data.status==="draft");
+  if(data?.status==="submitted")extra+='<div class="thread-receipt">'+icon("check",16)+'Request received. Switch to Garage to review it.</div>';
+  if(data?.status==="proposed"){
+    extra+='<div class="proposal-response"><p>Does this approach work for you?</p>'+
+      '<button class="button" data-action="accept">Accept next step '+icon("check",16)+'</button>'+
+      '<button class="text-button" data-action="change">Ask for a change</button>'+
+      '<span class="fine-print">An appointment and any charges still need confirming.</span>'+
+      '<form id="change-form" data-form="change" hidden><label for="change-message">What would work better?</label><textarea id="change-message" name="change" maxlength="2000" required></textarea><button class="button secondary">Send change request</button></form></div>';
+  }
+  const showComposer=!data||data.stage==="questions"||data.stage==="review";
+  const bottom=showComposer?'<div class="composer-wrap">'+
+    (data?.stage==="review"?'<div class="send-request-bar"><span>Ready for garage review</span><button class="button compact" data-action="submit">Send request '+icon("arrow",16)+'</button></div>':'')+
+    '<form class="message-composer" data-form="message"><textarea id="composer" aria-label="Your message" name="text" maxlength="4000" rows="1" placeholder="'+
+      (data?.stage==="review"?"Add something we've missed…":data?"Type your reply…":"Describe what's going on…")+'">'+e(compose)+'</textarea>'+
+    '<div class="composer-tools"><label class="attach-button" title="Attach a photo">'+icon("attach")+'<span class="sr-only">Attach a photo</span><input type="file" id="upload" accept="image/jpeg,image/png,image/webp" multiple></label>'+
+    '<button class="send-button" aria-label="Send message" '+(!compose.trim()?'disabled':'')+'>'+icon("send")+'</button></div></form>'+
+    '<p class="composer-caption">No mechanical vocabulary needed. <span>Photos are optional.</span></p></div>':
+    '<div class="conversation-footer">Demo saved in this browser. No real messages are sent.</div>';
+  return '<div class="chat-shell"><header class="chat-header">'+brand()+'<div><h1>North Street Garage <span class="verified">'+icon("check",12)+'</span></h1><p>Before your visit <span>·</span> Intake assistant</p></div></header>'+
+    '<main class="thread" aria-label="Conversation with the garage"><div class="thread-date">Your car, in your own words</div>'+
+    messages.map(messageRow).join("")+extra+
+    (feedback?'<div class="inline-error" role="status">'+e(feedback)+'</div>':'')+
+    '<div id="thread-bottom"></div></main>'+bottom+'</div>';
+}
+function editIssueForm(i){
+  return '<form class="issue-editor" data-form="issue" data-id="'+e(i.id)+'">'+
+    textField("Concern","title",i.title,true)+
+    '<label for="symptoms">Reported symptoms</label><textarea id="symptoms" name="symptoms" required>'+e(i.symptoms.join("\n"))+'</textarea>'+
+    '<label for="unknown">Still unknown</label><textarea id="unknown" name="unknown">'+e(i.uncertainties.join("\n"))+'</textarea>'+
+    '<button class="button secondary compact">Save edits</button></form>';
+}
+function issueRow(i){
+  return '<article class="brief-issue"><div class="issue-heading"><span class="priority-number">'+i.priority+'</span><h2>'+e(i.title)+'</h2><button class="text-button" data-action="edit" data-id="'+e(i.id)+'">'+(editing===i.id?'Cancel':'Edit')+'</button></div>'+
+    (editing===i.id?editIssueForm(i):
+    '<p class="symptom-summary">'+(i.id==="lights"&&i.onset!=="Not confirmed"?'Started '+e(i.onset.toLowerCase())+'. ':'')+
+      e(i.symptoms.length>1?i.symptoms.slice(1).join(" "):i.symptoms.join(" "))+'</p>'+
+    '<p class="issue-unknown">'+(i.workType==="inspect-and-quote"?'Inspect before quoting':i.workType==="known-work"?'Known work requested':'Diagnosis required')+
+      (i.uncertainties.length?' · '+e(i.uncertainties.join("; ")):'')+'</p>'+
+    '<div class="decision-buttons" role="group" aria-label="Action for '+e(i.title)+'">'+Object.entries(ACTIONS).map(([value,label])=>
+      '<button class="'+(i.decision===value?'selected':'')+'" aria-pressed="'+(i.decision===value)+'" data-action="decision" data-id="'+e(i.id)+'" data-value="'+value+'">'+label+'</button>').join("")+'</div>')+'</article>';
+}
+function garage(){
+  const data=state.intake;
+  if(!data||data.status==="draft")return staffHeader()+'<main class="staff-page"><h1>A clear brief before the car arrives.</h1><div class="empty-state"><p>'+(data?"The customer hasn't sent this request yet.":"Try the customer chat, or load the completed Škoda example.")+
+    '</p><button class="button" data-action="customer">Open customer chat '+icon("arrow",16)+'</button> <button class="button secondary" data-action="completed">Load completed example</button></div></main>';
+  const labels={submitted:"Ready to review",proposed:"Awaiting customer",accepted:"Customer accepted",change_requested:"Change requested"};
+  const p=data.preferences;
+  if(!proposalDraft)proposalDraft=data.proposal?.text||IntakeProvider.draftProposal(data);
+  return staffHeader()+'<main class="staff-page brief-page"><div class="page-heading brief-heading"><div><h1>'+e(data.customer.name)+'</h1><p class="vehicle-line">'+e(data.vehicle.registration||"Registration not supplied")+' <span>·</span> '+e(data.vehicle.description)+'</p></div><span class="status-pill '+data.status+'">'+labels[data.status]+'</span></div>'+
+    (data.safety==="urgent"?'<div class="triage-alert"><strong>Contact the customer before driving.</strong><p>Possible urgent warning or change in driving reported. Confirm advice and whether recovery is needed.</p></div>':'')+
+    (p.excludedWork.length?'<div class="excluded-line">'+icon("check",16)+'<span><strong>Outside this request:</strong> '+e(p.excludedWork.join(" and "))+' · '+e(p.exclusionReason)+'</span></div>':'')+
+    '<section class="brief-list" aria-label="Prioritised concerns">'+data.issues.map(issueRow).join("")+'</section>'+
+    '<section class="visit-summary"><div class="section-heading"><h2>Visit details</h2><button class="text-button" data-action="visit">'+(visitEditing?'Cancel':'Edit')+'</button></div>'+
+    (visitEditing?'<form class="visit-editor" data-form="visit"><label for="availability">Availability</label><textarea id="availability" name="availability">'+e(p.availability)+'</textarea><label for="constraints">Preferences</label><textarea id="constraints" name="constraints">'+e(p.constraints)+'</textarea>'+
+      textField("Excluded work, separated by commas","excluded",p.excludedWork.join(", "))+'<button class="button secondary">Save details</button></form>':
+    '<dl><div><dt>Availability</dt><dd>'+e(p.availability||"Not supplied")+'</dd></div><div><dt>Preferences</dt><dd>'+e(p.constraints||"None added")+'</dd></div><div><dt>Approval</dt><dd>'+e(p.approval)+'</dd></div></dl>')+'</section>'+
+    (data.photos.length?'<section class="brief-photos"><h2>Customer photos</h2><div>'+data.photos.map(p=>'<button data-action="photo" data-id="'+e(p.id)+'"><img src="'+e(p.dataUrl)+'" alt="'+e(p.name)+'"><span>'+e(p.name)+'</span></button>').join("")+'</div></section>':'')+
+    (data.proposal?.response?'<div class="customer-response"><div class="eyebrow">Customer reply</div><p>'+e(data.proposal.response)+'</p></div>':'')+
+    '<section class="next-step"><div class="section-heading"><h2>Propose the next step</h2><button class="text-button" data-action="draft">Draft from decisions</button></div>'+
+    '<form data-form="proposal"><label class="sr-only" for="proposal">Message to customer</label><textarea id="proposal" name="proposal" maxlength="6000" required>'+e(proposalDraft)+'</textarea>'+
+    '<div class="proposal-footer"><span>Demo reply · no real SMS</span><button class="button">Send next step '+icon("arrow",16)+'</button></div></form>'+
+    (feedback?'<p class="save-feedback" role="status">'+e(feedback)+' <button class="text-button" data-action="notification">Open notification →</button></p>':'')+'</section>'+
+    '<details class="source-conversation"><summary>Original conversation</summary>'+data.messages.map(m=>'<div><span>'+e(m.role==="customer"?"Customer":m.role==="garage"?"Garage":"Intake assistant")+'</span><p>'+e(m.text)+'</p></div>').join("")+'</details></main>';
+}
+function notification(){
+  const n=state.notification;
+  return staffHeader()+'<main class="staff-page brief-page"><div class="eyebrow">Simulated notification</div><h1>A way back to the conversation.</h1>'+
+    '<p class="demo-intro">This is a preview of what the customer would receive. No SMS is sent.</p>'+
+    (n?'<div class="sms-list"><article class="sms-card"><div class="sms-card-top"><span>Example recipient: '+e(state.intake.customer.mobile)+'</span><span>SMS preview</span></div><p>North Street Garage has proposed a next step for your car.</p><a class="button" href="'+returnPath()+'">Open customer conversation '+icon("arrow",16)+'</a><p class="fine-print" style="margin-top:15px">This return link uses the demo saved in this browser.</p></article></div>':
+    '<div class="empty-state"><p>Send a next step from the Garage view to create a notification.</p><button class="button secondary" data-action="garage">Open garage</button></div>')+'</main>';
+}
+function resizeComposer(){
+  const box=$("#composer");
+  if(box){box.style.height="auto";box.style.height=Math.min(box.scrollHeight,180)+"px";}
+}
+function render(){
+  const {view}=route();
+  document.querySelectorAll("[data-nav]").forEach(b=>{
+    const selected=b.dataset.nav===view;b.classList.toggle("active",selected);b.setAttribute("aria-current",selected?"page":"false");
+  });
+  $("#notification-dot").hidden=!state.notification||state.intake?.status!=="proposed";
+  $("#app").innerHTML=view==="garage"?garage():view==="notification"?notification():customer();
+  resizeComposer();
+  if(view==="customer")requestAnimationFrame(()=>$("#thread-bottom")?.scrollIntoView({block:"end",behavior:"instant"}));
+  else window.scrollTo(0,0);
+}
+function send(text){
+  if(!text.trim())return;
+  if(!state.intake){
+    state.id=uuid();state.intake=IntakeProvider.start(text.trim(),"demo");
+    state.intake.photos=pendingPhotos.map(p=>({...p,issueId:null}));pendingPhotos=[];
+  }else if(state.intake.stage==="questions")IntakeProvider.answer(state.intake,text.trim());
+  else if(state.intake.stage==="review")IntakeProvider.revise(state.intake,text.trim());
+  compose="";feedback="";save();
+  if(route().id!==state.id)go("customer",state.id);else render();
+}
+function restart(){
+  state={version:1,id:null,intake:null,notification:null};compose=IntakeProvider.SCENARIO;
+  pendingPhotos=[];proposalDraft="";proposalEdited=false;editing=null;visitEditing=false;feedback="";
+  try{localStorage.removeItem(KEY);}catch{}
+  go("customer");
+}
+document.addEventListener("click",event=>{
+  const button=event.target.closest("[data-action]");if(!button)return;
+  const action=button.dataset.action,id=button.dataset.id,value=button.dataset.value;
+  if(["customer","garage","notification"].includes(action)){feedback="";go(action,action==="customer"?state.id:null);}
+  if(action==="quick")send(value);
+  if(action==="restart"&&(!state.intake||window.confirm("Clear this demo and start again?")))restart();
+  if(action==="completed"){
+    if(state.intake&&!window.confirm("Replace the current demo with the completed example?"))return;
+    state={version:1,id:uuid(),intake:IntakeProvider.completeDemo(),notification:null};
+    proposalDraft="";proposalEdited=false;compose="";feedback="Completed example loaded.";save();go("garage");
+  }
+  if(action==="submit"){
+    if(compose.trim()){feedback="Send your extra detail first, or clear it before sending the request.";render();return;}
+    IntakeProvider.submit(state.intake);feedback="";save();render();
+  }
+  if(action==="decision"){
+    state.intake.issues.find(i=>i.id===id).decision=value;
+    if(!proposalEdited)proposalDraft=IntakeProvider.draftProposal(state.intake);
+    save();render();
+  }
+  if(action==="edit"){editing=editing===id?null:id;render();}
+  if(action==="visit"){visitEditing=!visitEditing;render();}
+  if(action==="draft"){proposalDraft=IntakeProvider.draftProposal(state.intake);proposalEdited=false;render();}
+  if(action==="change"){
+    $("#change-form").hidden=!$("#change-form").hidden;$("#change-message").focus();
+  }
+  if(action==="accept"){
+    const d=state.intake;
+    if(d.status!=="proposed")return;
+    d.status="accepted";d.proposal.status="accepted";d.proposal.response="I've accepted the proposed next step.";
+    IntakeProvider.addMessage(d,"customer",d.proposal.response);
+    IntakeProvider.addMessage(d,"assistant","Thank you. The garage still needs to confirm an appointment and any charges. No repairs are authorised.");
+    save();render();
+  }
+  if(action==="remove-photo"){
+    if(state.intake)state.intake.photos=state.intake.photos.filter(p=>p.id!==id);
+    else pendingPhotos=pendingPhotos.filter(p=>p.id!==id);
+    save();render();
+  }
+  if(action==="photo"){
+    const p=(state.intake?.photos||pendingPhotos).find(p=>p.id===id);
+    $("#photo-content").innerHTML='<button class="lightbox-close" data-action="close-photo" aria-label="Close photo">'+icon("close")+'</button><img src="'+e(p.dataUrl)+'" alt="'+e(p.name)+'"><p>'+e(p.name)+'</p>';
+    $("#photo-dialog").showModal();
+  }
+  if(action==="close-photo")$("#photo-dialog").close();
+});
+document.addEventListener("submit",event=>{
+  const form=event.target.closest("[data-form]");if(!form)return;event.preventDefault();
+  const values=Object.fromEntries(new FormData(form));
+  const kind=form.dataset.form;
+  if(kind==="message"){send(values.text);return;}
+  if(kind==="contact"){
+    if(values.mobile.replace(/\D/g,"").length<7){feedback="Please use the example number or add a mobile number.";render();return;}
+    IntakeProvider.setContact(state.intake,{name:values.name.trim(),mobile:values.mobile.trim()},{registration:values.registration.trim().toUpperCase(),description:values.description.trim()});
+  }
+  if(kind==="issue"){
+    const issue=state.intake.issues.find(i=>i.id===form.dataset.id);
+    issue.title=values.title.trim();issue.symptoms=values.symptoms.split("\n").map(s=>s.trim()).filter(Boolean);
+    issue.uncertainties=values.unknown.split("\n").map(s=>s.trim()).filter(Boolean);editing=null;
+  }
+  if(kind==="visit"){
+    Object.assign(state.intake.preferences,{availability:values.availability.trim(),constraints:values.constraints.trim(),excludedWork:values.excluded.split(",").map(s=>s.trim()).filter(Boolean)});
+    visitEditing=false;if(!proposalEdited)proposalDraft=IntakeProvider.draftProposal(state.intake);
+  }
+  if(kind==="proposal"){
+    if(editing||visitEditing){feedback="Save or cancel the open edits first.";render();return;}
+    const text=values.proposal.trim();if(!text)return;
+    state.intake.proposal={id:uuid(),text,status:"pending",response:"",sentAt:new Date().toISOString(),decisions:state.intake.issues.map(i=>({issueId:i.id,decision:i.decision}))};
+    state.intake.status="proposed";IntakeProvider.addMessage(state.intake,"garage",text);
+    state.notification={requestId:state.id,body:text,returnURL:fullReturnURL()};
+    proposalDraft=text;proposalEdited=true;feedback="Next step ready. Open the simulated notification to return as the customer.";
+  }
+  if(kind==="change"){
+    const d=state.intake,text=values.change.trim();if(!text||d.status!=="proposed")return;
+    d.status="change_requested";d.proposal.status="change_requested";d.proposal.response=text;
+    IntakeProvider.addMessage(d,"customer",text);IntakeProvider.addMessage(d,"assistant","Your change request is with the garage.");
+  }
+  save();render();
+});
+document.addEventListener("input",event=>{
+  if(event.target.id==="composer"){
+    compose=event.target.value;resizeComposer();$(".send-button").disabled=!compose.trim();
+  }
+  if(event.target.id==="proposal"){proposalDraft=event.target.value;proposalEdited=true;}
+});
+document.addEventListener("keydown",event=>{
+  if(event.target.id==="composer"&&event.key==="Enter"&&!event.shiftKey&&!event.isComposing){event.preventDefault();send(event.target.value);}
+});
+document.addEventListener("change",async event=>{
+  if(event.target.id!=="upload")return;
+  const files=Array.from(event.target.files);event.target.value="";
+  const current=state.intake?.photos||pendingPhotos;
+  if(current.length+files.length>3){feedback="You can attach up to 3 photos.";render();return;}
+  const prepared=[];
+  for(const file of files){
+    if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>1024*1024){
+      feedback="Choose a JPG, PNG or WebP photo under 1 MB.";render();return;
+    }
+    try{
+      const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});
+      prepared.push({id:uuid(),name:file.name,dataUrl,issueId:null});
+    }catch{feedback="That photo couldn't be opened. Please try another.";render();return;}
+  }
+  current.push(...prepared);feedback="";save();render();
+});
+$("#photo-dialog").addEventListener("click",event=>{if(event.target===$("#photo-dialog"))$("#photo-dialog").close();});
+window.addEventListener("hashchange",()=>{feedback="";render();});
+window.addEventListener("storage",event=>{
+  if(event.key!==KEY)return;
+  try{const fresh=JSON.parse(event.newValue||"null");if(fresh?.version===1){state=fresh;render();}}catch{}
+});
+render();
+
+</script>
+</body>
+</html>

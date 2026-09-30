@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SCENARIO,start,answer,nextQuestion,completeDemo,triage,revise,setContact,submit,draftProposal } from "../lib/intelligence.mjs";
+import { readFileSync } from "node:fs";
+const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
+const provider=html.match(/\/\/ BEGIN INTAKE PROVIDER\n([\s\S]*?)\n\/\/ END INTAKE PROVIDER/)[1];
+const { SCENARIO,start,answer,nextQuestion,completeDemo,triage,revise,setContact,submit,draftProposal }=new Function(provider+"\nreturn IntakeProvider;")();
 
 test("Skoda scenario preserves three separate faults and excluded dealer work",()=>{
   const data=start(SCENARIO);

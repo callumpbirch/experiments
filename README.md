@@ -1,8 +1,5 @@
-# experiments
-Experiments
+# Experiments
 
-## Garage intake
+[Open the garage intake demo](https://raw.githack.com/callumpbirch/experiments/garage-intake-prototype/garage-intake/index.html).
 
-A customer chat, a prioritised garage brief, and a simulated SMS return journey.
-
-See [garage-intake/README.md](garage-intake/README.md) for setup and the demo.
+A small browser demo: customer chat → clear garage brief → proposed next step. No installation or sign-in.
