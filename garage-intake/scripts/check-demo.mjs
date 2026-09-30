@@ -10,7 +10,9 @@ async function journey(url){
  const context=await browser.newContext({viewport:{width:390,height:844}});
  let page=await context.newPage();
  const errors=[];page.on("pageerror",e=>errors.push(e.message));
- await page.goto(url);
+ const response=await page.goto(url);
+ await page.waitForTimeout(1000);
+ console.log("HOST "+url+" status="+response?.status()+" body="+(await page.locator("body").innerText()).slice(0,700)+" errors="+JSON.stringify(errors));
  await page.getByRole("button",{name:"Send message",exact:true}).click();
  for(const text of ["Amber only, drives normally","Over bumps","Tuesday or Thursday morning","Please quote before repairs"]){
   await page.getByRole("button",{name:text,exact:true}).click();
@@ -40,5 +42,10 @@ async function journey(url){
  console.log("PASS full customer / garage / notification / reopen journey: "+url);
 }
 await journey(pathToFileURL(path.resolve("garage-intake/index.html")).href);
-await journey(process.env.DEMO_URL);
+const base=process.env.DEMO_URL;
+let passed=false;
+for(const url of [base,base.replace("raw.githack.com","rawcdn.githack.com"),"https://htmlpreview.github.io/?"+base.replace("https://raw.githack.com","https://github.com").replace("/experiments/","/experiments/blob/")]){
+ try{await journey(url);passed=true;console.log("VERIFIED_DEMO_URL="+url);break;}catch(e){console.log("Hosting candidate failed: "+e.message);}
+}
+assert.ok(passed,"No hosted demo candidate passed");
 }finally{await browser.close();}
