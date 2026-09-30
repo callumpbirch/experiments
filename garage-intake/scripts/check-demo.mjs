@@ -18,6 +18,7 @@ async function journey(url){
  await page.getByRole("button",{name:"Continue",exact:true}).click();
  await page.getByRole("button",{name:"Send request",exact:true}).click();
  await page.locator('[data-nav][data-action="garage"]').click();
+ await page.locator(".brief-issue").first().waitFor();
  assert.equal(await page.locator(".brief-issue").count(),3);
  assert.match(await page.locator(".excluded-line").innerText(),/MOT and Service/);
  await page.locator('.brief-issue').filter({has:page.getByRole("heading",{name:/Knock/i})}).getByRole("button",{name:"Schedule later",exact:true}).click();
