@@ -75,7 +75,14 @@ test("mobile customer → garage → SMS return in a fresh browser → acceptanc
   await resumed.getByRole("button",{name:"Accept next step",exact:true}).click();
   await expect(resumed.getByText(/Thank you. The garage still needs to confirm/)).toBeVisible();
   await info.attach("returned customer",{body:await resumed.screenshot(),contentType:"image/png"});
+  const persisted=await (await resumed.request.get("/api/conversations/"+returnPath.split("/").at(-1))).json();
+  console.log("Acceptance persisted:",JSON.stringify({status:persisted.data.status,response:persisted.data.proposal?.response}));
+  expect(persisted.data.proposal.response).toBe("I've accepted the proposed next step.");
+  const staffSaved=await (await garage.request.get("/api/garage/"+garagePath.split("/").at(-1))).json();
+  console.log("Staff saved response:",JSON.stringify({status:staffSaved.data.status,response:staffSaved.data.proposal?.response}));
+  expect(staffSaved.data.proposal.response).toBe("I've accepted the proposed next step.");
   await garage.goto(garagePath);
+  console.log("Staff visible reply:",await garage.locator(".customer-response").count(),await garage.locator("main").innerText());
   await expect(garage.locator(".status-pill")).toHaveText("Customer accepted");
   await expect(garage.locator(".customer-response")).toContainText("I've accepted the proposed next step.");
   await returned.close();await staff.close();
