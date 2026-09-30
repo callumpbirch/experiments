@@ -23,8 +23,19 @@ async function journey(url){
  await page.locator(".brief-issue").first().waitFor();
  assert.equal(await page.locator(".brief-issue").count(),3);
  assert.match(await page.locator(".excluded-line").innerText(),/MOT and Service/);
- await page.locator('.brief-issue').filter({has:page.getByRole("heading",{name:/Knock/i})}).getByRole("button",{name:"Schedule later",exact:true}).click();
- await page.getByRole("button",{name:"Send next step",exact:true}).click();
+ assert.equal(await page.locator('[data-action="decision"]').count(),0);
+ assert.match(await page.locator(".reason-contact").innerText(),/warning lights.*yesterday/i);
+ assert.match(await page.locator(".brief-list").innerText(),/Over bumps/);
+ assert.equal(await page.locator(".concern-details[open]").count(),0);
+ const knock=page.locator(".brief-issue").filter({has:page.getByRole("heading",{name:"Knocking noise",exact:true})});
+ await knock.locator("summary").click();
+ assert.match(await knock.locator(".detail-content").innerText(),/I hear it over bumps/);
+ await knock.getByRole("button",{name:"Edit recorded details",exact:true}).click();
+ await knock.locator('[name="handover"]').fill("Knock over bumps; customer asks for a check.");
+ await knock.getByRole("button",{name:"Save edits",exact:true}).click();
+ await page.locator(".symptom-summary").filter({hasText:"Knock over bumps; customer asks for a check."}).waitFor();
+ await page.locator(".reply-panel>summary").click();
+ await page.getByRole("button",{name:"Send reply",exact:true}).click();
  await page.locator('[data-nav][data-action="notification"]').click();
  const link=page.getByRole("link",{name:/Open customer conversation/});
  const returnURL=new URL(await link.getAttribute("href"),page.url()).href;
@@ -44,7 +55,7 @@ async function journey(url){
 await journey(pathToFileURL(path.resolve("garage-intake/index.html")).href);
 const base=process.env.DEMO_URL;
 let passed=false;
-for(const url of [base,base.replace("raw.githack.com","rawcdn.githack.com"),"https://htmlpreview.github.io/?"+base.replace("https://raw.githack.com","https://github.com").replace("/experiments/","/experiments/blob/")]){
+for(const url of [base]){
  try{await journey(url);passed=true;console.log("VERIFIED_DEMO_URL="+url);break;}catch(e){console.log("Hosting candidate failed: "+e.message);}
 }
 assert.ok(passed,"No hosted demo candidate passed");

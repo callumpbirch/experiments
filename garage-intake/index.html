@@ -249,6 +249,39 @@ button,a{touch-action:manipulation}
 .example-label{font-size:10px!important;color:#8b9587!important;margin:9px 0 0!important}
 .save-feedback .text-button{font-size:12px}
 @media(max-width:420px){.demo-toolbar{padding-inline:10px;gap:4px}.demo-toolbar button{padding-inline:8px}.demo-toolbar>span{font-size:9px}}
+
+.handover{max-width:720px}
+.handover .brief-heading{margin-bottom:24px}
+.reason-contact{border-left:3px solid #93a488;padding:3px 0 3px 15px;margin:0 0 27px}
+.reason-contact>p:last-child{font-size:17px;line-height:1.5;margin-top:5px}
+.detail-label{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:7px}
+.section-title{font-size:15px}
+.section-caption{font-size:12px;color:var(--muted);line-height:1.5;margin:5px 0 15px}
+.handover .brief-issue{padding:18px 20px}
+.handover .issue-heading{margin-bottom:5px}
+.handover .issue-heading h2{font-size:15px}
+.handover .symptom-summary{font-size:14px}
+.concern-details{margin-top:9px;font-size:12px}
+.concern-details summary,.more-customer-details>summary{cursor:pointer;color:var(--muted);padding:5px 0}
+.detail-content{margin-top:14px;font-size:13px;line-height:1.6}
+.detail-content blockquote{margin:8px 0 17px;padding:0 0 0 12px;border-left:2px solid var(--line);white-space:pre-wrap;color:#435044}
+.detail-content .text-button{margin-top:12px}
+.handover .visit-summary{margin:22px 0}
+.handover .visit-summary dl{gap:10px}
+.handover .excluded-line{display:grid;background:none;padding:0;margin:0;color:inherit;border-radius:0;line-height:inherit}
+.more-customer-details{border-top:1px solid var(--line);padding:11px 0;font-size:13px}
+.more-customer-details dl{display:grid;gap:12px;margin:0}
+.more-customer-details dt{color:var(--muted);font-size:12px}
+.more-customer-details dd{margin:3px 0 0;white-space:pre-wrap}
+.handover .source-conversation{margin-top:22px}
+.handover .reply-panel{border:0;margin:15px 0 0;padding:0}
+.reply-panel>summary{display:flex;align-items:center;justify-content:space-between;cursor:pointer;list-style:none;background:var(--green);color:white;border-radius:8px;padding:14px 17px;font-size:14px;font-weight:600}
+.reply-panel>summary::-webkit-details-marker{display:none}
+.reply-panel[open]>summary{background:#e6eedf;color:var(--ink)}
+.reply-content{padding-top:15px}
+.handover .next-step textarea{min-height:180px}
+@media(max-width:600px){.handover .brief-issue{padding:15px 17px}.reason-contact>p:last-child{font-size:16px}.handover .brief-heading{gap:10px}.handover .brief-heading h1{font-size:24px}.handover .status-pill{font-size:10px}}
+
 </style>
 </head>
 <body>
@@ -597,45 +630,83 @@ function customer(){
     (feedback?'<div class="inline-error" role="status">'+e(feedback)+'</div>':'')+
     '<div id="thread-bottom"></div></main>'+bottom+'</div>';
 }
+function shortText(text,max=145){const s=String(text||"").replace(/\s+/g," ").trim();return s.length>max?s.slice(0,max-1)+"…":s;}
+function reportedSummary(i,data){
+  if(i.handover)return i.handover;
+  const text=(i.symptoms||[]).join(" ");
+  if(i.id==="lights"){
+    const answer=data.answers.lights||"";
+    if(data.safety==="reported-normal")return "Amber lights; no change in braking or steering reported.";
+    if(data.safety==="urgent")return "Red / flashing lights or a change in driving reported. Contact customer before driving.";
+    return shortText(answer||i.symptoms[0]||"Warning lights reported; type and driving behaviour unconfirmed.");
+  }
+  if(i.id==="knock"){
+    const parts=[];
+    if(/over bumps/i.test(text))parts.push("Over bumps");
+    if(/when turning/i.test(text))parts.push("When turning");
+    if(/when braking/i.test(text))parts.push("When braking");
+    if(/\bat the front\b/i.test(text))parts.push("at the front");
+    if(/getting louder/i.test(text))parts.push("getting louder");
+    if(i.onset!=="Not confirmed")parts.push("reported for "+i.onset);
+    return parts.length?parts.join("; ")+".":shortText(i.symptoms.at(-1));
+  }
+  if(i.id==="boot"&&/stay|drop|fall|hold|support/i.test(text))return "Boot won't stay open.";
+  return shortText(i.symptoms.at(-1));
+}
+function draftReply(data){
+  const name=data.customer.name.split(" ")[0]||"there";
+  const concerns=data.issues.map(i=>i.title.toLowerCase()).join(", ");
+  const safety=data.safety==="urgent"?"Please call us before driving so we can discuss a safe way to bring the car in. ":"";
+  return "Hi "+name+", thanks for the details. "+safety+"We suggest arranging a visit to check the "+concerns+". We'll agree any diagnostic charge before starting and contact you with findings and costs before repairs.\n\n"+(data.preferences.availability?"We'll check what we can offer around your availability. ":"")+"An appointment still needs confirming.";
+}
 function editIssueForm(i){
   return '<form class="issue-editor" data-form="issue" data-id="'+e(i.id)+'">'+
-    textField("Concern","title",i.title,true)+
+    textField("Concern","title",i.title,true)+textField("Short handover","handover",reportedSummary(i,state.intake),true)+
     '<label for="symptoms">Reported symptoms</label><textarea id="symptoms" name="symptoms" required>'+e(i.symptoms.join("\n"))+'</textarea>'+
     '<label for="unknown">Still unknown</label><textarea id="unknown" name="unknown">'+e(i.uncertainties.join("\n"))+'</textarea>'+
     '<button class="button secondary compact">Save edits</button></form>';
 }
 function issueRow(i){
-  return '<article class="brief-issue"><div class="issue-heading"><span class="priority-number">'+i.priority+'</span><h2>'+e(i.title)+'</h2><button class="text-button" data-action="edit" data-id="'+e(i.id)+'">'+(editing===i.id?'Cancel':'Edit')+'</button></div>'+
-    (editing===i.id?editIssueForm(i):
-    '<p class="symptom-summary">'+(i.id==="lights"&&i.onset!=="Not confirmed"?'Started '+e(i.onset.toLowerCase())+'. ':'')+
-      e(i.symptoms.length>1?i.symptoms.slice(1).join(" "):i.symptoms.join(" "))+'</p>'+
-    '<p class="issue-unknown">'+(i.workType==="inspect-and-quote"?'Inspect before quoting':i.workType==="known-work"?'Known work requested':'Diagnosis required')+
-      (i.uncertainties.length?' · '+e(i.uncertainties.join("; ")):'')+'</p>'+
-    '<div class="decision-buttons" role="group" aria-label="Action for '+e(i.title)+'">'+Object.entries(ACTIONS).map(([value,label])=>
-      '<button class="'+(i.decision===value?'selected':'')+'" aria-pressed="'+(i.decision===value)+'" data-action="decision" data-id="'+e(i.id)+'" data-value="'+value+'">'+label+'</button>').join("")+'</div>')+'</article>';
+  const data=state.intake;
+  return '<article class="brief-issue"><div class="issue-heading"><h2>'+e(i.title)+'</h2></div>'+
+    '<p class="symptom-summary">'+e(reportedSummary(i,data))+'</p>'+
+    '<details class="concern-details" '+(editing===i.id?'open':'')+'><summary>Customer wording &amp; unknowns</summary>'+
+    '<div class="detail-content"><p class="detail-label">Customer reported</p>'+
+    i.symptoms.map(s=>'<blockquote>'+e(s)+'</blockquote>').join("")+
+    '<p class="detail-label">Still unknown</p><p>'+e(i.id==="lights"?(/\bABS\b|\bESC\b|tyre pressure|engine light/i.test(i.symptoms.join(" "))?"Cause unconfirmed. Lights and driving behaviour are customer reports.":"Exact warning lights and cause unconfirmed. Driving behaviour is a customer report."):i.uncertainties.join("; ")||"Cause unconfirmed.")+'</p>'+
+    '<button class="text-button" data-action="edit" data-id="'+e(i.id)+'">'+(editing===i.id?'Cancel edit':'Edit recorded details')+'</button>'+
+    (editing===i.id?editIssueForm(i):'')+'</div></details></article>';
 }
 function garage(){
   const data=state.intake;
   if(!data||data.status==="draft")return staffHeader()+'<main class="staff-page"><h1>A clear brief before the car arrives.</h1><div class="empty-state"><p>'+(data?"The customer hasn't sent this request yet.":"Try the customer chat, or load the completed Škoda example.")+
     '</p><button class="button" data-action="customer">Open customer chat '+icon("arrow",16)+'</button> <button class="button secondary" data-action="completed">Load completed example</button></div></main>';
-  const labels={submitted:"Ready to review",proposed:"Awaiting customer",accepted:"Customer accepted",change_requested:"Change requested"};
+  const labels={submitted:"New enquiry",proposed:"Awaiting customer",accepted:"Customer accepted",change_requested:"Change requested"};
   const p=data.preferences;
-  if(!proposalDraft)proposalDraft=data.proposal?.text||IntakeProvider.draftProposal(data);
-  return staffHeader()+'<main class="staff-page brief-page"><div class="page-heading brief-heading"><div><h1>'+e(data.customer.name)+'</h1><p class="vehicle-line">'+e(data.vehicle.registration||"Registration not supplied")+' <span>·</span> '+e(data.vehicle.description)+'</p></div><span class="status-pill '+data.status+'">'+labels[data.status]+'</span></div>'+
-    (data.safety==="urgent"?'<div class="triage-alert"><strong>Contact the customer before driving.</strong><p>Possible urgent warning or change in driving reported. Confirm advice and whether recovery is needed.</p></div>':'')+
-    (p.excludedWork.length?'<div class="excluded-line">'+icon("check",16)+'<span><strong>Outside this request:</strong> '+e(p.excludedWork.join(" and "))+' · '+e(p.exclusionReason)+'</span></div>':'')+
-    '<section class="brief-list" aria-label="Prioritised concerns">'+data.issues.map(issueRow).join("")+'</section>'+
-    '<section class="visit-summary"><div class="section-heading"><h2>Visit details</h2><button class="text-button" data-action="visit">'+(visitEditing?'Cancel':'Edit')+'</button></div>'+
+  if(!proposalDraft)proposalDraft=data.proposal?.text||draftReply(data);
+  const firstSentence=(data.original.match(/[^.!?]+[.!?]?/)||[data.original])[0];
+  const availability=shortText(p.availability||"Not supplied",130);
+  const needs=/school runs/i.test(p.constraints)?"Needs car for school runs." : shortText(p.constraints.replace(/Nothing else\.?\s*/gi,""),100);
+  return staffHeader()+'<main class="staff-page brief-page handover"><div class="page-heading brief-heading"><div><h1>'+e(data.customer.name)+'</h1><p class="vehicle-line">'+e(data.vehicle.registration||"Registration not supplied")+' <span>·</span> '+e(data.vehicle.description)+'</p></div><span class="status-pill '+data.status+'">'+labels[data.status]+'</span></div>'+
+    '<section class="reason-contact"><p class="detail-label">Reason for contact</p><p>'+e(shortText(firstSentence,200))+'</p></section>'+
+    (data.safety==="urgent"?'<div class="triage-alert"><strong>Contact customer before driving.</strong><p>Red / flashing lights or a change in driving reported. Confirm advice and whether recovery is needed.</p></div>':'')+
+    '<section class="concerns-section" aria-label="Reported concerns"><h2 class="section-title">Reported concerns</h2><p class="section-caption">Customer observations · causes not established</p><div class="brief-list">'+data.issues.map(issueRow).join("")+'</div></section>'+
+    '<section class="visit-summary"><dl><div><dt>Visit</dt><dd>'+e(availability)+'</dd></div>'+
+    (needs?'<div><dt>Needs</dt><dd>'+e(needs)+'</dd></div>':'')+
+    '<div><dt>Approval</dt><dd>'+e(p.approval)+'</dd></div>'+
+    (p.excludedWork.length?'<div class="excluded-line"><dt>Leave out</dt><dd>'+e(p.excludedWork.join(" and "))+' — '+e(p.exclusionReason)+'</dd></div>':'')+'</dl></section>'+
+    '<details class="more-customer-details" '+(visitEditing?'open':'')+'><summary>More customer details'+(data.photos.length?' · '+data.photos.length+' photo'+(data.photos.length===1?'':'s'):'')+'</summary><div class="detail-content">'+
+    '<dl><div><dt>Contact</dt><dd>'+e(data.customer.mobile||"Not supplied")+'</dd></div><div><dt>Availability</dt><dd>'+e(p.availability||"Not supplied")+'</dd></div><div><dt>Preferences &amp; constraints</dt><dd>'+e(p.constraints||"None added")+'</dd></div><div><dt>Urgency requested</dt><dd>'+e(p.urgency)+'</dd></div></dl>'+
+    '<button class="text-button" data-action="visit">'+(visitEditing?'Cancel edit':'Edit visit details')+'</button>'+
     (visitEditing?'<form class="visit-editor" data-form="visit"><label for="availability">Availability</label><textarea id="availability" name="availability">'+e(p.availability)+'</textarea><label for="constraints">Preferences</label><textarea id="constraints" name="constraints">'+e(p.constraints)+'</textarea>'+
-      textField("Excluded work, separated by commas","excluded",p.excludedWork.join(", "))+'<button class="button secondary">Save details</button></form>':
-    '<dl><div><dt>Availability</dt><dd>'+e(p.availability||"Not supplied")+'</dd></div><div><dt>Preferences</dt><dd>'+e(p.constraints||"None added")+'</dd></div><div><dt>Approval</dt><dd>'+e(p.approval)+'</dd></div></dl>')+'</section>'+
-    (data.photos.length?'<section class="brief-photos"><h2>Customer photos</h2><div>'+data.photos.map(p=>'<button data-action="photo" data-id="'+e(p.id)+'"><img src="'+e(p.dataUrl)+'" alt="'+e(p.name)+'"><span>'+e(p.name)+'</span></button>').join("")+'</div></section>':'')+
+      textField("Excluded work, separated by commas","excluded",p.excludedWork.join(", "))+'<button class="button secondary">Save details</button></form>':'')+
+    (data.photos.length?'<div class="brief-photos"><h2>Customer photos</h2><div>'+data.photos.map(p=>'<button data-action="photo" data-id="'+e(p.id)+'"><img src="'+e(p.dataUrl)+'" alt="'+e(p.name)+'"><span>'+e(p.name)+'</span></button>').join("")+'</div></div>':'')+
+    '<details class="source-conversation"><summary>Full conversation</summary>'+data.messages.map(m=>'<div><span>'+e(m.role==="customer"?"Customer":m.role==="garage"?"Garage":"Intake assistant")+'</span><p>'+e(m.text)+'</p></div>').join("")+'</details></div></details>'+
     (data.proposal?.response?'<div class="customer-response"><div class="eyebrow">Customer reply</div><p>'+e(data.proposal.response)+'</p></div>':'')+
-    '<section class="next-step"><div class="section-heading"><h2>Propose the next step</h2><button class="text-button" data-action="draft">Draft from decisions</button></div>'+
+    '<details class="next-step reply-panel"><summary>Reply to customer '+icon("arrow",16)+'</summary><div class="reply-content"><p class="section-caption">Suggested reply · edit to reflect what you can offer</p>'+
     '<form data-form="proposal"><label class="sr-only" for="proposal">Message to customer</label><textarea id="proposal" name="proposal" maxlength="6000" required>'+e(proposalDraft)+'</textarea>'+
-    '<div class="proposal-footer"><span>Demo reply · no real SMS</span><button class="button">Send next step '+icon("arrow",16)+'</button></div></form>'+
-    (feedback?'<p class="save-feedback" role="status">'+e(feedback)+' <button class="text-button" data-action="notification">Open notification →</button></p>':'')+'</section>'+
-    '<details class="source-conversation"><summary>Original conversation</summary>'+data.messages.map(m=>'<div><span>'+e(m.role==="customer"?"Customer":m.role==="garage"?"Garage":"Intake assistant")+'</span><p>'+e(m.text)+'</p></div>').join("")+'</details></main>';
+    '<div class="proposal-footer"><span>Demo reply · no real SMS</span><button class="button">Send reply '+icon("arrow",16)+'</button></div></form></div></details>'+
+    (feedback?'<p class="save-feedback" role="status">'+e(feedback)+' <button class="text-button" data-action="notification">Open notification →</button></p>':'')+'</main>';
 }
 function notification(){
   const n=state.notification;
@@ -690,14 +761,9 @@ document.addEventListener("click",event=>{
     if(compose.trim()){feedback="Send your extra detail first, or clear it before sending the request.";render();return;}
     IntakeProvider.submit(state.intake);feedback="";save();render();
   }
-  if(action==="decision"){
-    state.intake.issues.find(i=>i.id===id).decision=value;
-    if(!proposalEdited)proposalDraft=IntakeProvider.draftProposal(state.intake);
-    save();render();
-  }
   if(action==="edit"){editing=editing===id?null:id;render();}
   if(action==="visit"){visitEditing=!visitEditing;render();}
-  if(action==="draft"){proposalDraft=IntakeProvider.draftProposal(state.intake);proposalEdited=false;render();}
+  if(action==="draft"){proposalDraft=draftReply(state.intake);proposalEdited=false;render();}
   if(action==="change"){
     $("#change-form").hidden=!$("#change-form").hidden;$("#change-message").focus();
   }
@@ -732,12 +798,12 @@ document.addEventListener("submit",event=>{
   }
   if(kind==="issue"){
     const issue=state.intake.issues.find(i=>i.id===form.dataset.id);
-    issue.title=values.title.trim();issue.symptoms=values.symptoms.split("\n").map(s=>s.trim()).filter(Boolean);
+    issue.title=values.title.trim();issue.handover=values.handover.trim();issue.symptoms=values.symptoms.split("\n").map(s=>s.trim()).filter(Boolean);
     issue.uncertainties=values.unknown.split("\n").map(s=>s.trim()).filter(Boolean);editing=null;
   }
   if(kind==="visit"){
     Object.assign(state.intake.preferences,{availability:values.availability.trim(),constraints:values.constraints.trim(),excludedWork:values.excluded.split(",").map(s=>s.trim()).filter(Boolean)});
-    visitEditing=false;if(!proposalEdited)proposalDraft=IntakeProvider.draftProposal(state.intake);
+    visitEditing=false;if(!proposalEdited)proposalDraft=draftReply(state.intake);
   }
   if(kind==="proposal"){
     if(editing||visitEditing){feedback="Save or cancel the open edits first.";render();return;}
