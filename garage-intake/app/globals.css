@@ -60,11 +60,11 @@ button,a{touch-action:manipulation}
 .message-composer textarea{border:0;outline:0;box-shadow:none;background:none;resize:none;min-height:30px;max-height:180px;padding:3px 1px;font-size:14px;border-radius:0}
 .message-composer textarea::placeholder{color:#929a92}
 .composer-tools{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-top:7px}
-.attach-button{display:grid;place-items:center;border-radius:7px;cursor:pointer;margin:0;color:var(--muted);width:32px;height:32px}
+.attach-button{display:grid;place-items:center;border-radius:7px;cursor:pointer;margin:0;color:var(--muted);width:40px;height:40px}
 .attach-button:hover{background:var(--pale);color:var(--green)}
 .attach-button input{display:none}
 .attach-button.disabled{pointer-events:none;opacity:.45}
-.send-button{display:grid;place-items:center;border:0;background:var(--green);color:white;border-radius:50%;height:34px;width:34px}
+.send-button{display:grid;place-items:center;border:0;background:var(--green);color:white;border-radius:50%;height:40px;width:40px}
 .send-button:hover{background:var(--green-dark)}
 .send-button:disabled{background:#e1e8dc;color:#8d9c86;opacity:1}
 .composer-caption{text-align:center;font-size:10px;color:#929b90;margin-top:9px}

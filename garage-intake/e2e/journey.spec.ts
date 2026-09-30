@@ -17,7 +17,10 @@ test("mobile customer → garage → SMS return in a fresh browser → acceptanc
   await expect(page).toHaveURL(/\/c\/[A-Za-z0-9_-]{43}$/);
   const returnPath=new URL(page.url()).pathname;
   await expect(page.getByText("Are any lights red or flashing, or has braking or steering changed?",{exact:true})).toBeVisible();
-  await info.attach("mobile chat",{body:await page.screenshot(),contentType:"image/png"});
+  const mobileScreenshot=await page.screenshot();
+  await info.attach("mobile chat",{body:mobileScreenshot,contentType:"image/png"});
+  console.log("DEMO_VISUAL_MOBILE:"+mobileScreenshot.toString("base64"));
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   async function reply(text:string,next:string){
     await page.getByRole("textbox",{name:"Your message"}).fill(text);
     await page.getByRole("button",{name:"Send message",exact:true}).click();
@@ -46,6 +49,7 @@ test("mobile customer → garage → SMS return in a fresh browser → acceptanc
   await garage.getByRole("button",{name:"Sign in",exact:true}).click();
   await expect(garage).toHaveURL(/\/garage$/);
   await garage.getByRole("link",{name:/Sam Taylor/}).first().click();
+  await expect(garage).toHaveURL(/\/garage\/[a-f0-9-]{36}$/);
   const garagePath=new URL(garage.url()).pathname;
   await expect(garage.getByRole("heading",{name:"Warning lights",exact:true})).toBeVisible();
   await expect(garage.getByRole("heading",{name:"Knocking noise",exact:true})).toBeVisible();
@@ -59,7 +63,9 @@ test("mobile customer → garage → SMS return in a fresh browser → acceptanc
   await garage.getByRole("button",{name:"Apply edits",exact:true}).click();
   await garage.getByRole("button",{name:"Draft from decisions",exact:true}).click();
   await expect(garage.getByLabel("Message to customer")).toHaveValue(/later visit for knocking/);
-  await info.attach("garage brief",{body:await garage.screenshot({fullPage:true}),contentType:"image/png"});
+  const garageScreenshot=await garage.screenshot({fullPage:true});
+  await info.attach("garage brief",{body:garageScreenshot,contentType:"image/png"});
+  console.log("DEMO_VISUAL_GARAGE:"+garageScreenshot.toString("base64"));
   await garage.getByRole("button",{name:"Send next step",exact:true}).click();
   await expect(garage.getByRole("status")).toContainText("Proposal saved.");
   await garage.getByRole("link",{name:/Open SMS preview/}).click();
@@ -76,13 +82,10 @@ test("mobile customer → garage → SMS return in a fresh browser → acceptanc
   await expect(resumed.getByText(/Thank you. The garage still needs to confirm/)).toBeVisible();
   await info.attach("returned customer",{body:await resumed.screenshot(),contentType:"image/png"});
   const persisted=await (await resumed.request.get("/api/conversations/"+returnPath.split("/").at(-1))).json();
-  console.log("Acceptance persisted:",JSON.stringify({status:persisted.data.status,response:persisted.data.proposal?.response}));
   expect(persisted.data.proposal.response).toBe("I've accepted the proposed next step.");
   const staffSaved=await (await garage.request.get("/api/garage/"+garagePath.split("/").at(-1))).json();
-  console.log("Staff saved response:",JSON.stringify({status:staffSaved.data.status,response:staffSaved.data.proposal?.response}));
   expect(staffSaved.data.proposal.response).toBe("I've accepted the proposed next step.");
   await garage.goto(garagePath);
-  console.log("Staff visible reply:",await garage.locator(".customer-response").count(),await garage.locator("main").innerText());
   await expect(garage.locator(".status-pill")).toHaveText("Customer accepted");
   await expect(garage.locator(".customer-response")).toContainText("I've accepted the proposed next step.");
   await returned.close();await staff.close();
