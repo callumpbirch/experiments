@@ -1,0 +1,56 @@
+name: Garage intake checks
+on:
+  push:
+    branches: [garage-intake-prototype]
+    paths: ['garage-intake/**', '.github/workflows/garage-intake.yml']
+  pull_request:
+    paths: ['garage-intake/**', '.github/workflows/garage-intake.yml']
+permissions:
+  contents: read
+jobs:
+  prototype:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: garage
+          POSTGRES_PASSWORD: garage
+          POSTGRES_DB: garage
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: garage-intake
+    env:
+      DATABASE_URL: postgresql://garage:garage@localhost:5432/garage
+      AUTH_SECRET: ci-test-only-secret-longer-than-thirty-two-characters
+      GARAGE_PASSWORD: ci-test-only-password
+      APP_URL: http://localhost:3000
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install
+      - run: npm test
+      - run: npm run db:setup
+      - run: npm run build
+      - run: npm run typecheck
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: garage-intake-verification
+          path: |
+            garage-intake/playwright-report
+            garage-intake/test-results
+            garage-intake/package-lock.json
+          retention-days: 7
